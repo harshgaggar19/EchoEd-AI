@@ -1,7 +1,7 @@
 "use client";
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, CheckCircle } from "lucide-react";
 import {
   SignedIn,
   SignedOut,
@@ -9,7 +9,7 @@ import {
   SignOutButton,
 } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-
+import { toast } from "sonner";
 type CardNavLink = {
   label: string;
   href: string;
@@ -209,6 +209,7 @@ const CardNav: React.FC<CardNavProps> = ({
             <SignedOut>
               <SignInButton>
                 <button
+                  onClick={() => toast.loading("Signing in..")}
                   type="button"
                   className="card-nav-cta-button cursor-target hidden md:inline-flex items-center border-0 rounded-[calc(0.75rem-0.2rem)] px-4 h-full font-medium cursor-pointer transition-colors duration-300"
                   style={{
@@ -232,7 +233,25 @@ const CardNav: React.FC<CardNavProps> = ({
               >
                 Dashboard
               </button>
-              <SignOutButton />
+              <SignOutButton>
+                <button
+                  onClick={() =>
+                    toast.success("Signed out", {
+                      description: "You’ve been signed out successfully.",
+                      duration: 3000,
+                      icon: <CheckCircle className="h-5 w-5 text-green-500" />,
+                    })
+                  }
+                  type="button"
+                  className="card-nav-cta-button cursor-target hidden md:inline-flex items-center border-0 rounded-[calc(0.75rem-0.2rem)] px-4 h-full font-medium cursor-pointer transition-colors duration-300"
+                  style={{
+                    backgroundColor: buttonBgColor,
+                    color: buttonTextColor,
+                  }}
+                >
+                  Sign Out
+                </button>
+              </SignOutButton>
             </SignedIn>
           </div>
         </div>

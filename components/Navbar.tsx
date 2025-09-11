@@ -1,6 +1,7 @@
 import React from "react";
 import CardNav from "./CardNav";
 import TargetCursor from "./TargetCursor";
+import { SignedIn, UserButton } from "@clerk/nextjs";
 
 export default function Navbar() {
   const items = [
@@ -50,7 +51,7 @@ export default function Navbar() {
     },
   ];
   return (
-    <div>
+    <div className="w-screen">
       <TargetCursor spinDuration={2} hideDefaultCursor={true} />
       <CardNav
         logo={"/vercel.svg"}
@@ -62,6 +63,11 @@ export default function Navbar() {
         buttonTextColor="#fff"
         ease="power3.out"
       />
+      <SignedIn>
+        <div className="absolute h-20 scale-150 w-20 right-3 top-3 flex justify-between items-center">
+          <UserButton />
+        </div>
+      </SignedIn>
     </div>
   );
 }

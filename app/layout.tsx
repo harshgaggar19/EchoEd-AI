@@ -2,6 +2,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
+import { CheckCircleIcon } from "lucide-react";
 
 export default function RootLayout({
   children,
@@ -17,9 +19,18 @@ export default function RootLayout({
         disableTransitionOnChange
       >
         <html lang="en">
-          <title>EchoEd AI</title>
-          <Navbar />
-          <body>{children}</body>
+          <head>
+            <title>EchoEd AI</title>
+          </head>
+          <body>
+            <Navbar />
+            <Toaster
+              position="bottom-right"
+              theme="system"
+              icons={{ success: <CheckCircleIcon /> }}
+            />
+            {children}
+          </body>
         </html>
       </ThemeProvider>
     </ClerkProvider>
