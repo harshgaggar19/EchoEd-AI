@@ -1,65 +1,67 @@
-"use client";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuViewport,
-} from "@/components/ui/navigation-menu";
-import { Bot } from "lucide-react";
-import Link from "next/link";
-import { useRouter} from "next/navigation";
+import React from "react";
+import CardNav from "./CardNav";
+import TargetCursor from "./TargetCursor";
 
-import {
-  SignedIn,
-  SignedOut,
-  SignIn,
-  SignInButton,
-  UserButton,
-  useUser,
-} from "@clerk/nextjs";
-import { Button } from "./ui/button";
-import { useEffect, useState } from "react";
-
-export function Navbar() {
-  const router = useRouter();
+export default function Navbar() {
+  const items = [
+    {
+      label: "Docs",
+      bgColor: "#4A1D1F",
+      textColor: "#FFE4D6",
+      links: [
+        {
+          label: "Getting Started",
+          ariaLabel: "Getting Started Guide",
+          href: "#",
+        },
+        {
+          label: "SDK Installation",
+          ariaLabel: "How to install the SDK",
+          href: "#",
+        },
+        {
+          label: "Website Integration",
+          ariaLabel: "How to integrate on your website",
+          href: "#",
+        },
+      ],
+    },
+    {
+      label: "Pricing",
+      bgColor: "#7B2D26",
+      textColor: "#FFF2E6",
+      links: [
+        { label: "Plans", ariaLabel: "View our pricing plans", href: "#" },
+        {
+          label: "Compare Features",
+          ariaLabel: "Compare features between plans",
+          href: "#",
+        },
+      ],
+    },
+    {
+      label: "Contact",
+      bgColor: "#271E37",
+      textColor: "#fff",
+      links: [
+        { label: "Email", ariaLabel: "Email us" },
+        { label: "LinkedIn", ariaLabel: "LinkedIn" },
+      ],
+    },
+  ];
   return (
-    <div className="w-screen h-[7vh] flex px-10 items-center justify-between fixed top-0 left-0 bg-white z-50 shadow-md">
-      <div className="flex gap-2 font-bold items-center">
-        <Link href="/" >
-        <Bot /> EcoEdu AI</Link>
-      </div>
-      <div className="flex gap-10">
-        <NavigationMenu>
-          <NavigationMenuList className="gap-10">
-            {/* <SignedIn> */}
-              <NavigationMenuItem className="text-black">
-                <NavigationMenuLink asChild>
-                  <Link href="/dashboard" className="font-medium text-lg">Dashboard</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            {/* </SignedIn> */}
-          </NavigationMenuList>
-        </NavigationMenu>
-        <div className="h-[7vh] flex justify-center items-center">
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
-          <SignedOut>
-            <SignInButton
-              mode="modal"
-                onSignIn={() => {
-                router.push("/home");
-              }}
-            >
-              <Button>Sign In</Button>
-            </SignInButton>
-          </SignedOut>
-        </div>
-      </div>
+    <div>
+      <TargetCursor spinDuration={2} hideDefaultCursor={true} />
+      <CardNav
+        logo={"/vercel.svg"}
+        logoAlt="Company Logo"
+        items={items}
+        baseColor="#000"
+        menuColor="#fff"
+        buttonBgColor="#111"
+        buttonTextColor="#fff"
+        ease="power3.out"
+      />
     </div>
   );
 }

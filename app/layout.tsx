@@ -1,8 +1,7 @@
-"use client";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
-
+import Navbar from "@/components/Navbar";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export default function RootLayout({
   children,
@@ -11,13 +10,18 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <title>EchoEdu AI</title>
-        <body>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="dark"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <html lang="en">
+          <title>EchoEd AI</title>
           <Navbar />
-          {children}
-        </body>
-      </html>
+          <body>{children}</body>
+        </html>
+      </ThemeProvider>
     </ClerkProvider>
   );
 }
