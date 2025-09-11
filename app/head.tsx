@@ -4,7 +4,6 @@ export default function Head() {
     <>
       <title>EchoEdu AI</title>
       <meta name="description" content="Echoing knowledge, Multilingually!" />
-      {/* other meta tags */}
     </>
   );
 }

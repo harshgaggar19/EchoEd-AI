@@ -13,17 +13,17 @@ export default function Navbar() {
         {
           label: "Getting Started",
           ariaLabel: "Getting Started Guide",
-          href: "#",
+          href: "/dashboard",
         },
         {
           label: "SDK Installation",
           ariaLabel: "How to install the SDK",
-          href: "#",
+          href: "/dashboard",
         },
         {
           label: "Website Integration",
           ariaLabel: "How to integrate on your website",
-          href: "#",
+          href: "/dashboard",
         },
       ],
     },
@@ -45,8 +45,16 @@ export default function Navbar() {
       bgColor: "#271E37",
       textColor: "#fff",
       links: [
-        { label: "Email", ariaLabel: "Email us" },
-        { label: "LinkedIn", ariaLabel: "LinkedIn" },
+        {
+          label: "Email",
+          ariaLabel: "Email us",
+          href: "mailto:nirajsalunke@gmail.com",
+        },
+        {
+          label: "LinkedIn",
+          ariaLabel: "LinkedIn",
+          href: "https://www.linkedin.com/",
+        },
       ],
     },
   ];
@@ -63,11 +71,6 @@ export default function Navbar() {
         buttonTextColor="#fff"
         ease="power3.out"
       />
-      <SignedIn>
-        <div className="absolute h-20 scale-150 w-20 right-3 top-3 flex justify-between items-center">
-          <UserButton />
-        </div>
-      </SignedIn>
     </div>
   );
 }

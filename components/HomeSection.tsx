@@ -55,7 +55,7 @@ export default function HomeSection() {
               </Link>
 
               <Link
-                href="/docs"
+                href="/dashboard"
                 className="text-gray-300 cursor-target hover:text-white"
               >
                 Integration docs →

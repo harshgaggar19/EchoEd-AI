@@ -23,7 +23,6 @@ export default function RootLayout({
             <title>EchoEd AI</title>
           </head>
           <body>
-            <Navbar />
             <Toaster
               position="bottom-right"
               theme="system"

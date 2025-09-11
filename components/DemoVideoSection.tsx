@@ -59,7 +59,7 @@ export function DemoVideoSection({
           </p>
           <div className="mt-6 flex flex-col sm:flex-row items-center sm:items-start justify-center lg:justify-start gap-4">
             <Link
-              href={"/docs"}
+              href={"/dashboard"}
               className="inline-flex cursor-target items-center gap-3 px-6 py-3 rounded-2xl bg-white text-black font-semibold shadow"
             >
               Full integration docs →
