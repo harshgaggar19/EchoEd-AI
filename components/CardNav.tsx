@@ -207,19 +207,19 @@ const CardNav: React.FC<CardNavProps> = ({
 
           <div className="h-full flex gap-2">
             <SignedOut>
-              <SignInButton>
-                <button
-                  onClick={() => toast.loading("Signing in..")}
-                  type="button"
-                  className="card-nav-cta-button cursor-target hidden md:inline-flex items-center border-0 rounded-[calc(0.75rem-0.2rem)] px-4 h-full font-medium cursor-pointer transition-colors duration-300"
-                  style={{
-                    backgroundColor: buttonBgColor,
-                    color: buttonTextColor,
-                  }}
-                >
-                  Get Started
-                </button>
-              </SignInButton>
+              <button
+                onClick={() => {
+                  router.push("/auth");
+                }}
+                type="button"
+                className="card-nav-cta-button cursor-target hidden md:inline-flex items-center border-0 rounded-[calc(0.75rem-0.2rem)] px-4 h-full font-medium cursor-pointer transition-colors duration-300"
+                style={{
+                  backgroundColor: buttonBgColor,
+                  color: buttonTextColor,
+                }}
+              >
+                Get Started
+              </button>
             </SignedOut>
             <SignedIn>
               <button
@@ -233,25 +233,6 @@ const CardNav: React.FC<CardNavProps> = ({
               >
                 Dashboard
               </button>
-              <SignOutButton>
-                <button
-                  onClick={() =>
-                    toast.success("Signed out", {
-                      description: "You’ve been signed out successfully.",
-                      duration: 3000,
-                      icon: <CheckCircle className="h-5 w-5 text-green-500" />,
-                    })
-                  }
-                  type="button"
-                  className="card-nav-cta-button cursor-target hidden md:inline-flex items-center border-0 rounded-[calc(0.75rem-0.2rem)] px-4 h-full font-medium cursor-pointer transition-colors duration-300"
-                  style={{
-                    backgroundColor: buttonBgColor,
-                    color: buttonTextColor,
-                  }}
-                >
-                  Sign Out
-                </button>
-              </SignOutButton>
             </SignedIn>
           </div>
         </div>

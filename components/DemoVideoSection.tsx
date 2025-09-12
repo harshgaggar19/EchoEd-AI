@@ -6,9 +6,11 @@ import React from "react";
 export function DemoVideoSection({
   videoUrl = "/vid.mp4",
   poster = "/poster.png",
+  descrip = true,
 }: {
   videoUrl?: string;
   poster?: string;
+  descrip?: boolean;
 }) {
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = React.useState(false);
@@ -52,19 +54,23 @@ export function DemoVideoSection({
           <h2 className="text-4xl lg:text-5xl font-extrabold leading-tight">
             See how easy integration is — live demo
           </h2>
-          <p className="mt-4 text-lg text-gray-300">
-            Watch a short demo showing how college staff generate an API key,
-            upload files to the dashboard, and embed the EchoEd chatbot on the
-            website.
-          </p>
-          <div className="mt-6 flex flex-col sm:flex-row items-center sm:items-start justify-center lg:justify-start gap-4">
-            <Link
-              href={"/dashboard"}
-              className="inline-flex cursor-target items-center gap-3 px-6 py-3 rounded-2xl bg-white text-black font-semibold shadow"
-            >
-              Full integration docs →
-            </Link>
-          </div>
+          {descrip && (
+            <p className="mt-4 text-lg text-gray-300">
+              Watch a short demo showing how college staff generate an API key,
+              upload files to the dashboard, and embed the EchoEd chatbot on the
+              website.
+            </p>
+          )}
+          {descrip && (
+            <div className="mt-6 flex flex-col sm:flex-row items-center sm:items-start justify-center lg:justify-start gap-4">
+              <Link
+                href={"/dashboard"}
+                className="inline-flex cursor-target items-center gap-3 px-6 py-3 rounded-2xl bg-white text-black font-semibold shadow"
+              >
+                Full integration docs →
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="mt-12">

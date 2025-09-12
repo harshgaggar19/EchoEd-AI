@@ -23,7 +23,7 @@ interface TabProviderProps {
 
 export function TabProvider({ children }: TabProviderProps) {
   const [mainTab, setMainTab] = useState<string>("Dashboard");
-  const [subTab, setSubTab] = useState<string>("");
+  const [subTab, setSubTab] = useState<string>("Analytics");
 
   return (
     <TabContext.Provider value={{ mainTab, setMainTab, subTab, setSubTab }}>

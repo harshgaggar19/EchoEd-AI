@@ -17,7 +17,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { useTab } from "@/hooks/tab-context";
+import { useTab } from "@/components/hooks/tab-context";
 
 export function NavMain({
   items,

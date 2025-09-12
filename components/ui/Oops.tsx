@@ -1,7 +1,8 @@
+import Link from "next/link";
 import React, { useMemo, useEffect, useState } from "react";
 
 export default function Oops({
-  signInHref = "/signin",
+  signInHref = "/auth",
   className = "",
 }: {
   signInHref?: string;
@@ -19,7 +20,6 @@ export default function Oops({
     "You brought curiosity but forgot the login. Tragic.",
     "We checked. Your session is lounging on the beach. Sign in to wake it.",
   ];
-
   const line = useMemo(() => pool[Math.floor(Math.random() * pool.length)], []);
 
   const [showToast, setShowToast] = useState(true);
@@ -115,8 +115,8 @@ export default function Oops({
                 Sign in required
               </h1>
               <p className="mt-1 text-sm text-gray-300 max-w-md">
-                You're trying to access the dashboard, which is private. Sign in
-                to continue — we promise it's worth it.
+                You&apos;re trying to access the dashboard, which is private.
+                Sign in to continue — we promise it&apos;s worth it.
               </p>
             </div>
           </div>
@@ -131,21 +131,21 @@ export default function Oops({
             </div>
 
             <div className="flex-none w-full sm:w-44 flex flex-col justify-center gap-3">
-              <button
-                onClick={() => (window.location.href = signInHref)}
+              <Link
+                href={signInHref}
                 className="w-full rounded-full px-4 py-2 bg-white text-black font-semibold shadow hover:transform hover:scale-[1.01] transition"
                 aria-label="Sign in"
               >
                 Sign in
-              </button>
+              </Link>
 
-              <button
-                onClick={() => window.history.back()}
+              <Link
+                href={"/"}
                 className="w-full rounded-full px-4 py-2 border border-white/10 text-white/90 hover:bg-white/3 transition"
                 aria-label="Go back"
               >
                 Go back
-              </button>
+              </Link>
             </div>
           </div>
         </div>

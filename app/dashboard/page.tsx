@@ -1,4 +1,8 @@
 "use client";
+import Analytics from "@/components/Analytics";
+import ChatTest from "@/components/ChatTest";
+import InstallDocs from "@/components/InstallDocs";
+import IntegrateDocs from "@/components/IntegrateDocs";
 import { ModeToggle } from "@/components/ModeToggle";
 import { AppSidebar } from "@/components/ui/app-sidebar";
 import {
@@ -16,7 +20,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { useTab } from "@/hooks/tab-context";
+import Uploads from "@/components/Uploads";
+import { useTab } from "@/components/hooks/tab-context";
 import { useUser } from "@clerk/nextjs";
 
 export default function Page() {
@@ -53,12 +58,11 @@ export default function Page() {
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-          </div>
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+          {subTab === "Analytics" && <Analytics />}
+          {subTab === "Uploads" && <Uploads />}
+          {subTab === "EchoEd Assistant" && <ChatTest />}
+          {subTab === "SDK Installation" && <InstallDocs />}
+          {subTab === "Website Integration" && <IntegrateDocs />}
         </div>
       </SidebarInset>
     </SidebarProvider>
