@@ -18,6 +18,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { SignOutButton } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export function NavUser({
   user,
@@ -78,10 +80,10 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <SignOutButton>
-                <div className="flex w-full items-center gap-2">
+                <Link href={"/"} className="flex w-full items-center gap-2">
                   <LogOut />
                   Log out
-                </div>
+                </Link>
               </SignOutButton>
             </DropdownMenuItem>
           </DropdownMenuContent>

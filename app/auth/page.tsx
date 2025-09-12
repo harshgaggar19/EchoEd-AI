@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -21,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
+import api from "@/lib/api";
 
 export default function Page() {
   useEffect(() => {
@@ -157,6 +157,12 @@ export default function Page() {
         await setActive({ session: sessionId });
         toast.success("Verified and logged in!");
         setsubVerify("Verified!");
+        const { data } = await api.post("/api/org/create", {
+          clerkId: user?.id || "sdasdas",
+          name: user?.firstName || "Niraj",
+          email: user?.emailAddresses[0]?.emailAddress || emailAddress,
+        });
+        console.log(data.success);
         router.push("/");
         return;
       }

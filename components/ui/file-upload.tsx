@@ -25,6 +25,8 @@ const secondaryVariant = {
   },
 };
 
+export const removeFile = () => {};
+
 export const FileUpload = ({
   onChange,
 }: {
@@ -62,6 +64,7 @@ export const FileUpload = ({
           ref={fileInputRef}
           id="file-upload-handle"
           type="file"
+          accept="application/pdf"
           onChange={(e) => handleFileChange(Array.from(e.target.files || []))}
           className="hidden"
         />

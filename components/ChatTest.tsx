@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, User, Bot } from "lucide-react";
 import api from "@/lib/api";
+import { useUser } from "@clerk/nextjs";
+import { v4 as uuidv4 } from "uuid";
 
 const AVATARS = {
   user: <User className="text-indigo-500" size={20} />,
@@ -11,6 +13,8 @@ const AVATARS = {
 };
 
 const ChatTest: React.FC = () => {
+  const { user } = useUser();
+  const [sessionId, setSessionId] = useState(uuidv4());
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,15 +37,27 @@ const ChatTest: React.FC = () => {
     setLoading(true);
 
     try {
-      const { data } = await api.post("/api/chat", { message: userMsg.text });
+      const { data } = await api.post(
+        "/api/chat",
+        {
+          sessionId,
+          message: userMsg.text,
+        },
+        {
+          headers: {
+            email: user?.emailAddresses[0]?.emailAddress,
+          },
+        }
+      );
       const botMsg = {
         type: "bot",
-        text: data.response,
+        text: data.reply,
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, botMsg]);
       saveMessage(botMsg);
-    } catch {
+    } catch (error) {
+      console.log(error);
       setMessages((prev) => [
         ...prev,
         { type: "bot", text: "Error getting response.", timestamp: Date.now() },
@@ -82,6 +98,7 @@ const ChatTest: React.FC = () => {
             onClick={() => {
               setMessages([]);
               clearMessages();
+              setSessionId(uuidv4());
             }}
           >
             Clear Chat

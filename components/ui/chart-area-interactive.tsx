@@ -73,9 +73,14 @@ export function ChartAreaInteractive({
     <Card className="pt-0">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1">
-          <CardTitle>Area Chart - Interactive</CardTitle>
+          <CardTitle>Visitor Count Analytics</CardTitle>
           <CardDescription>
-            Showing total visitors for the last 3 months
+            Showing total visitors for the last{" "}
+            {timeRange === "90d"
+              ? "3 months"
+              : timeRange === "30d"
+              ? "30 days"
+              : "7 days"}
           </CardDescription>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>

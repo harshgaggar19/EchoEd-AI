@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, RefreshCcw, Eye, EyeOff, KeyRound } from "lucide-react";
 import { toast } from "sonner"; // shadcn toast
+import api from "@/lib/api";
+import { useUser } from "@clerk/nextjs";
 
 const sampleApiKey = "sk-7h1s1sABCDXXXXXXxy9nF@keY";
 const sdkInstallCommand = "npm install @echoed-ai/sdk";
@@ -15,7 +17,7 @@ export function ApiKeySection({
 }) {
   const [hidden, setHidden] = useState(true);
   const [copied, setCopied] = useState(false);
-
+  const [msg, setMsg] = useState("Generate");
   const handleCopy = () => {
     navigator.clipboard.writeText(apiKey);
     toast.success("API key copied!", { duration: 1400 });
@@ -74,10 +76,17 @@ export function ApiKeySection({
           type="button"
           variant="secondary"
           className="bg-teal-900 text-teal-200 font-bold flex-shrink-0 transition-colors border-none hover:bg-teal-800 mt-4 md:mt-0"
-          onClick={onRegenerate}
+          onClick={() => {
+            setMsg("Generating...");
+            setTimeout(() => {}, 1000);
+            onRegenerate();
+            setMsg("Generated");
+            setTimeout(() => {}, 1000);
+            setMsg("Generate");
+          }}
         >
           <RefreshCcw size={16} className="mr-2" />
-          Regenerate
+          {msg}
         </Button>
       </div>
       <p className="text-sm text-neutral-400 px-1">
@@ -89,9 +98,8 @@ export function ApiKeySection({
   );
 }
 
-// Helper for masked key
 function maskApiKey(key: string, visible: boolean) {
-  return visible ? key : key.replace(/.(?=.{4})/g, "•");
+  return visible ? key : key?.replace(/.(?=.{4})/g, "•");
 }
 function InstallSection({ command }: { command: string }) {
   const handleCopy = () => {
@@ -127,16 +135,42 @@ function InstallSection({ command }: { command: string }) {
 }
 
 export default function InstallDocs() {
-  const [apiKey, setApiKey] = useState(sampleApiKey);
-
-  // Simulated key regeneration (replace w/ API call in prod)
-  const handleRegenKey = () => {
-    setApiKey(
-      "sk-" +
-        Math.random().toString(36).substring(2, 8).toUpperCase() +
-        "XXXXXXxy9nF@keY"
-    );
-    toast.success("API key regenerated!", { duration: 1400 });
+  const [apiKey, setApiKey] = useState("Loading API key...");
+  const getApiKey = async () => {
+    try {
+      const { data } = await api.get("/api/org/get-keys", {
+        headers: {
+          email: user?.emailAddresses[0]?.emailAddress,
+        },
+      });
+      if (data.apiKey === "") {
+        setApiKey("No_API_KEY");
+        return;
+      }
+      console.log(data.apiKey);
+      setApiKey(data.apiKey);
+    } catch (error) {
+      console.error("Error_fetching_API_key:", error);
+      setApiKey("Error_fetching_API_key");
+    }
+  };
+  const { user } = useUser();
+  getApiKey();
+  const handleRegenKey = async () => {
+    try {
+      const { data } = await api.post("/api/org/generate-api-key", {
+        email: user?.emailAddresses[0]?.emailAddress || "niraj",
+      });
+      if (data.success) {
+        setApiKey(data.apiKey);
+        toast.success("API key re-generated!", { duration: 1400 });
+        return;
+      }
+      toast.success("API key failed to generate!", { duration: 1400 });
+    } catch (error) {
+      console.error("Error regenerating API key:", error);
+      toast.error("Failed to regenerate API key.", { duration: 1400 });
+    }
   };
 
   return (

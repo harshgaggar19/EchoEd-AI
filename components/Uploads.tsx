@@ -1,13 +1,16 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileUpload } from "@/components/ui/file-upload"; // shadcn FileUpload
+import { FileUpload } from "@/components/ui/file-upload";
 import { Download, Trash2 } from "lucide-react";
 import api from "@/lib/api";
+import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
+import Link from "next/link";
 
 type UploadedFile = {
   id: string;
-  name: string;
+  filename: string;
   size: number;
   uploadedAt: string;
   url?: string;
@@ -15,6 +18,14 @@ type UploadedFile = {
   uploading?: boolean;
   progress?: number;
   serverUrl?: string;
+};
+
+type Notice = {
+  id: string;
+  text: string;
+  createdAt: string;
+  processing?: boolean;
+  serverId?: string;
 };
 
 function formatBytes(bytes: number) {
@@ -28,7 +39,7 @@ function formatBytes(bytes: number) {
 const sampleFiles: UploadedFile[] = [
   {
     id: "f_demo_001",
-    name: "Syllabus_Sem1.pdf",
+    filename: "Syllabus_Sem1.pdf",
     size: 234_123,
     uploadedAt: "2025-09-10T10:15:00.000Z",
     url: "/mock-files/Syllabus_Sem1.pdf",
@@ -37,7 +48,7 @@ const sampleFiles: UploadedFile[] = [
   },
   {
     id: "f_demo_002",
-    name: "Campus_Map.pptx",
+    filename: "Campus_Map.pptx",
     size: 1_240_982,
     uploadedAt: "2025-09-09T08:05:00.000Z",
     url: "/mock-files/Campus_Map.pptx",
@@ -47,7 +58,7 @@ const sampleFiles: UploadedFile[] = [
 ];
 
 function getExt(name: string) {
-  return name.split(".").pop()?.toLowerCase() ?? "";
+  return name?.split(".")?.pop()?.toLowerCase() ?? "";
 }
 
 function FileTypeIcon({ ext }: { ext: string }) {
@@ -100,14 +111,44 @@ function fileColorClasses(ext: string) {
 }
 
 export default function Uploads({
-  initialFiles = sampleFiles,
+  initialFiles = [],
   onFilesChange,
+  initialNotices = [],
+  onNoticesChange,
 }: {
   initialFiles?: UploadedFile[];
   onFilesChange?: (files: UploadedFile[]) => void;
+  initialNotices?: Notice[];
+  onNoticesChange?: (notices: Notice[]) => void;
 }) {
   const [uploadedFiles, setUploadedFiles] =
     useState<UploadedFile[]>(initialFiles);
+  const [notices, setNotices] = useState<Notice[]>(initialNotices);
+  const [noticeInput, setNoticeInput] = useState("");
+  const { user } = useUser();
+  const [sendingNoticeIds, setSendingNoticeIds] = useState<
+    Record<string, boolean>
+  >({});
+  const getFiles = async () => {
+    try {
+      const { data } = await api.get("api/pdf/list", {
+        headers: {
+          email: user?.emailAddresses[0]?.emailAddress || "",
+        },
+      });
+      if (data.files === uploadedFiles) {
+        return;
+      }
+      toast.success("Files Fetched!!");
+      setUploadedFiles(data.files || []);
+    } catch (error) {
+      console.log(error);
+      toast.error("Error fetching files");
+    }
+  };
+  useEffect(() => {
+    getFiles();
+  }, []);
   const xhrMap = useRef<Record<string, XMLHttpRequest | null>>({});
 
   const handleFileUpload = useCallback(
@@ -116,7 +157,7 @@ export default function Uploads({
       const fileArray = Array.isArray(files) ? files : Array.from(files);
       const newFiles: UploadedFile[] = fileArray.map((f) => ({
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-        name: f.name,
+        filename: f.name,
         size: f.size,
         uploadedAt: new Date().toISOString(),
         url: URL.createObjectURL(f),
@@ -143,7 +184,7 @@ export default function Uploads({
       if (!fileObj.file) return;
       const id = fileObj.id;
       const form = new FormData();
-      form.append("pdf", fileObj.file, fileObj.name);
+      form.append("pdf", fileObj.file, fileObj.filename);
       setUploadedFiles((prev) =>
         prev.map((p) =>
           p.id === id ? { ...p, uploading: true, progress: 0 } : p
@@ -152,10 +193,9 @@ export default function Uploads({
       try {
         const response = await api.post("/api/pdf/upload", form, {
           headers: {
-            apikey:
-              "25bb2097326ca2c3934e3849f275423e5e91dc2cbb7f1ea80061a9d9f7e28a75",
+            email: user?.emailAddresses[0]?.emailAddress || "",
           },
-          onUploadProgress: (progressEvent) => {
+          onUploadProgress: (progressEvent: any) => {
             if (!progressEvent.total) return;
             const percent = Math.round(
               (progressEvent.loaded / progressEvent.total) * 100
@@ -187,7 +227,9 @@ export default function Uploads({
           )
         );
         onFilesChange?.(uploadedFiles.map((f) => f));
+        getFiles();
       } catch (error) {
+        console.log(error);
         setUploadedFiles((prev) =>
           prev.map((p) =>
             p.id === id ? { ...p, uploading: false, progress: 0 } : p
@@ -223,6 +265,72 @@ export default function Uploads({
     [onFilesChange]
   );
 
+  const handleAddNotice = useCallback(async () => {
+    const text = noticeInput.trim();
+    if (!text) return;
+    const id = `${Date.now()}-notice-${Math.random().toString(36).slice(2, 9)}`;
+    const newNotice: Notice = {
+      id,
+      text,
+      createdAt: new Date().toISOString(),
+      processing: true,
+    };
+
+    setNotices((prev) => {
+      const next = [newNotice, ...prev];
+      onNoticesChange?.(next);
+      return next;
+    });
+    setNoticeInput("");
+    setSendingNoticeIds((s) => ({ ...s, [id]: true }));
+
+    try {
+      const resp = await api.post(
+        "/api/notices/create",
+        { text },
+        {
+          headers: {
+            apikey:
+              "25bb2097326ca2c3934e3849f275423e5e91dc2cbb7f1ea80061a9d9f7e28a75",
+          },
+        }
+      );
+
+      const serverId = resp?.data?.id ?? resp?.data?.noticeId;
+
+      setNotices((prev) =>
+        prev.map((n) =>
+          n.id === id
+            ? { ...n, processing: false, serverId: serverId ?? n.serverId }
+            : n
+        )
+      );
+      onNoticesChange?.(notices.map((n) => n));
+    } catch (err) {
+      // mark as not processing and keep text so user can retry or delete
+      setNotices((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, processing: false } : n))
+      );
+    } finally {
+      setSendingNoticeIds((s) => {
+        const copy = { ...s };
+        delete copy[id];
+        return copy;
+      });
+    }
+  }, [noticeInput, onNoticesChange, notices]);
+
+  const handleDeleteNotice = useCallback(
+    (id: string) => {
+      setNotices((prev) => {
+        const next = prev.filter((n) => n.id !== id);
+        onNoticesChange?.(next);
+        return next;
+      });
+    },
+    [onNoticesChange]
+  );
+
   const noFiles = uploadedFiles.length === 0;
 
   return (
@@ -241,9 +349,7 @@ export default function Uploads({
             }
           }}
         />
-        <p className="mt-3 text-xs text-muted-foreground">
-          Allowed: .pdf, .ppt, .pptx (change allowed types on backend as needed)
-        </p>
+        <p className="mt-3 text-xs text-muted-foreground">Allowed: .pdf</p>
       </div>
 
       <div className="max-w-4xl mx-auto mt-4">
@@ -264,7 +370,7 @@ export default function Uploads({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {uploadedFiles.map((f) => {
-              const ext = getExt(f.name);
+              const ext = getExt(f.filename);
               const colorClass = fileColorClasses(ext);
               const displayUrl = f.serverUrl ?? f.url;
               return (
@@ -290,7 +396,9 @@ export default function Uploads({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div className="break-words max-w-full">
-                          <div className="font-medium truncate">{f.name}</div>
+                          <div className="font-medium truncate">
+                            {f.filename}
+                          </div>
                           <div className="text-xs text-muted-foreground mt-1">
                             {formatBytes(f.size)}
                           </div>
@@ -314,7 +422,7 @@ export default function Uploads({
                           </div>
                         </div>
                       ) : (
-                        f.serverUrl && (
+                        f.url && (
                           <div className="mt-3">
                             <div className="text-xs text-muted-foreground">
                               Stored on server
@@ -326,20 +434,22 @@ export default function Uploads({
                   </div>
 
                   <div className="flex items-center gap-2 mt-4 pt-2 border-t border-transparent">
-                    {displayUrl && (
-                      <a
-                        href={displayUrl}
+                    {f?.url ? (
+                      <Link
+                        href={f?.url}
                         target="_blank"
                         rel="noreferrer"
-                        download={f.serverUrl ? undefined : f.name}
+                        download={f.url}
                         className="inline-flex items-center gap-2 px-3 py-1 rounded-md text-sm hover:underline"
                       >
                         <Download size={16} />
                         <span>Download</span>
-                      </a>
+                      </Link>
+                    ) : (
+                      <></>
                     )}
 
-                    <Button
+                    {/* <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(f.id)}
@@ -347,13 +457,106 @@ export default function Uploads({
                     >
                       <Trash2 size={16} />
                       <span className="sr-only">Delete</span>
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
               );
             })}
           </div>
         )}
+      </div>
+
+      <div className="max-w-4xl mx-auto mt-6">
+        <h3 className="text-lg font-semibold">Text notices / plain messages</h3>
+        <p className="text-sm text-muted-foreground mb-3">
+          Short notices (e.g. &quot;Reminder: Bring your Hall tickets&quot;).
+        </p>
+
+        <Card className="p-4">
+          <CardContent>
+            <div className="space-y-3">
+              <label className="text-sm font-medium">Notice text</label>
+              <textarea
+                value={noticeInput}
+                onChange={(e) => setNoticeInput(e.target.value)}
+                rows={3}
+                className="w-full rounded-md border px-3 py-2 text-sm bg-background"
+                placeholder="Type a notice, e.g. 'School is closed tomorrow'"
+              />
+
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={handleAddNotice}
+                  disabled={noticeInput.trim().length === 0}
+                >
+                  Send notice
+                </Button>
+                <div className="text-sm text-muted-foreground ml-auto">
+                  {noticeInput.length} chars
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="mt-4">
+          <h4 className="text-sm font-semibold mb-2">Saved notices</h4>
+
+          {notices.length === 0 ? (
+            <Card className="p-4">
+              <CardContent>
+                <div className="text-sm text-muted-foreground">
+                  No notices yet.
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {notices.map((n) => (
+                <div
+                  key={n.id}
+                  className="p-3 border rounded-md bg-card flex flex-col"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium break-words">{n.text}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {new Date(n.createdAt).toLocaleString()}
+                      </div>
+                      <div className="mt-2 text-xs">
+                        {n.processing ? (
+                          <span className="text-muted-foreground">
+                            Processing...
+                          </span>
+                        ) : n.serverId ? (
+                          <span className="text-muted-foreground">
+                            Stored on server
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">
+                            Saved locally
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 ml-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteNotice(n.id)}
+                        className="text-destructive"
+                      >
+                        <Trash2 size={16} />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
