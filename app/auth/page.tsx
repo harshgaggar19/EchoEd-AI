@@ -23,7 +23,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
 
 export default function Page() {
-  // create clerk-captcha on mount (prevents Smart CAPTCHA missing DOM node)
   useEffect(() => {
     let created = false;
     if (typeof window !== "undefined") {
@@ -31,13 +30,11 @@ export default function Page() {
       if (!el) {
         el = document.createElement("div");
         el.id = "clerk-captcha";
-        // append to body so it exists at top-level client DOM
         document.body.appendChild(el);
         created = true;
       }
     }
     return () => {
-      // remove only if we created it (avoid removing user's existing element)
       const el = document.getElementById("clerk-captcha");
       if (created && el?.parentNode) el.parentNode.removeChild(el);
     };
@@ -45,7 +42,6 @@ export default function Page() {
 
   const { isSignedIn, user } = useUser();
   const router = useRouter();
-  // avoid collision: rename isLoaded flags
   const { isLoaded: signUpLoaded, signUp, setActive } = useSignUp();
   const { isLoaded: signInLoaded, signIn } = useSignIn();
 
@@ -303,6 +299,9 @@ export default function Page() {
                         type="password"
                         onChange={(e) => setPass(e.target.value)}
                       />
+                    </LabelInputContainer>
+                    <LabelInputContainer className="mb-4">
+                      <div id="clerk-captcha"></div>
                     </LabelInputContainer>
 
                     <button
