@@ -50,7 +50,7 @@ export default function HomeSection() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <SignedOut>
                 <Link
-                  href="/signup"
+                  href="/auth"
                   className="inline-flex cursor-target items-center gap-3 px-6 py-3 rounded-2xl bg-white text-black font-semibold shadow-lg hover:scale-[1.01] transition-transform"
                 >
                   Create Campus Account
